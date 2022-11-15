@@ -88,6 +88,19 @@ const getDepartments = () => {
     })
     return
 }
+const roleList = ["string"]
+const getRoles = () => {
+    while(roleList.length>0){
+        roleList.pop()
+    }
+    db.query("SELECT * FROM role;", function (err, res) {
+    
+        for (let i = 0; i < res.length; i++){
+            roleList.push(`${res[i].title}`)
+        }
+    })
+    return
+}
 
 const employeeList = ["string"]
 const getEmployees = () => {
@@ -127,7 +140,8 @@ const addRole = () => {
         .then((data) =>{
             let id = departmentList.indexOf(data.department)
             id++
-            db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${data.role}', '${data.salary}', '${id}')`, (err,res) =>{
+            db.query(`INSERT INTO role (title, salary, department_id) 
+            VALUES ('${data.role}', '${data.salary}', '${id}')`, (err,res) =>{
                 if(err) throw err
                 viewAllRoles()
             })             
@@ -135,6 +149,8 @@ const addRole = () => {
 }
 
 const addEmployee = () => {
+    const roleIDs = [...roleList]
+    const bosses = [...employeeList]
     inquirer
         .prompt([
             {
@@ -149,11 +165,31 @@ const addEmployee = () => {
             },
             {
                 type: "list",
+                name: "role",
+                choices: roleIDs,
+                message: "What is this employee's role?"
+            },
+            {
+                type: "list",
                 name: "manager",
-                choices: employeeList,
+                choices: bosses,
                 message: "Who does this employee report to?"
             },
         ])
+        .then((data) => {
+            let roleID = roleIDs.indexOf(data.role)
+            roleID++
+            let boss = bosses.indexOf(data.manager)
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
+            VALUES ('${data.first}', '${data.last}', '${roleID}', '${boss}')`, (err,res) =>{
+                if(err) throw err
+                viewAllEmployees()
+            }) 
+        })
+}
+
+const updateEmployee = () =>{
+    
 }
 
 var questions = [
@@ -166,10 +202,10 @@ var questions = [
     }
 ]
 
-
 const init = () => {
     getDepartments()
     getEmployees()
+    getRoles()
     inquirer
         .prompt(questions)
         .then((data) => {
@@ -190,6 +226,7 @@ const init = () => {
                     addRole()
                     break;
                 case options[5]:
+                    addEmployee()
                     break;
                 case options[6]:
                     break;
