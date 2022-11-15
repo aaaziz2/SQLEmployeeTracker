@@ -18,22 +18,41 @@ const viewAllDepartments = () => {
   }
 
 const viewAllRoles = () => {
-    db.query(`SELECT role.id AS "Role ID", role.title AS "Title", role.salary AS "Salary", role.department_id AS "Department ID" FROM role`, function (err, data) {
-        console.log(`\n\nAll Roles:`);
-        table(data);
-        console.log('Press up or down key to return to menu')
-    })
+    db.query(`SELECT role.id AS "Role ID", role.title AS "Title", 
+                role.salary AS "Salary", department.name AS "Department" 
+                FROM role
+                JOIN department
+                ON role.department_id = department.id`, 
+    
+        function (err, data) {
+            console.log(`\n\nAll Roles:`);
+            table(data);
+            console.log('Press up or down key to return to menu')
+        }
+    )
     init()
 }
 
 const viewAllEmployees = () => {
+    console.log(employeeList)
+    let bosses = [...employeeList]
     db.query(
-        `SELECT employee.first_name AS "First", employee.last_name AS "Last", role.title AS "Title"
+        `SELECT employee.id AS "Employee ID", employee.first_name AS "First",
+        employee.last_name AS "Last", role.title AS "Title", role.salary AS "Salary",
+        employee.manager_id AS "Manager"
         FROM employee
         JOIN role
         ON employee.role_id = role.id`,
     function (err, data) {
         console.log(`\n\nAll Employees:`);
+        for(let i = 0;i<data.length;i++){
+            if(data[i].Manager == null){
+                data[i].Manager = "N/A"
+            }
+            else{
+                data[i].Manager = bosses[data[i].Manager]
+            }
+        }
         table(data);
         console.log('Press up or down key to return to menu')
     })
