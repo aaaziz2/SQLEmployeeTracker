@@ -180,8 +180,7 @@ const addEmployee = () => {
             let roleID = roleIDs.indexOf(data.role)
             roleID++
             let boss = bosses.indexOf(data.manager)
-            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) 
-            VALUES ('${data.first}', '${data.last}', '${roleID}', '${boss}')`, (err,res) =>{
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${data.first}', '${data.last}', '${roleID}', '${boss}')`, (err,res) =>{
                 if(err) throw err
                 viewAllEmployees()
             }) 
@@ -189,7 +188,45 @@ const addEmployee = () => {
 }
 
 const updateEmployee = () =>{
-    
+    const roleIDs = [...roleList]
+    const bosses = [...employeeList]
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "select",
+                choices: bosses,
+                message: "Which employee do you want to update?"
+            },
+            {
+                type: "list",
+                name: "role",
+                choices: roleIDs,
+                message: "What is this employee's new role?"
+            },
+            {
+                type: "list",
+                name: "manager",
+                choices: bosses,
+                message: "Who does this employee report to now?"
+            },
+        ])
+        .then((data) => {
+            let roleID = roleIDs.indexOf(data.role)
+            roleID++
+            let boss = bosses.indexOf(data.manager)
+            let update = bosses.indexOf(data.select)
+            let query =`UPDATE employee SET role_id = ?, manager_id = ? WHERE id = ?`
+            if(boss == 0){
+                boss=null
+            }
+            db.query(query, [roleID,boss, update],
+                        (err,res) =>{
+                            if(err) throw err
+                            viewAllEmployees()
+                        }
+                    ) 
+        })
 }
 
 var questions = [
@@ -229,6 +266,7 @@ const init = () => {
                     addEmployee()
                     break;
                 case options[6]:
+                    updateEmployee()
                     break;
                 default:
                     console.log('Goodbye')
