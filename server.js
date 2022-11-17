@@ -34,7 +34,6 @@ const viewAllRoles = () => {
 }
 
 const viewAllEmployees = () => {
-    console.log(employeeList)
     let bosses = [...employeeList]
     db.query(
         `SELECT employee.id AS "Employee ID", employee.first_name AS "First",
@@ -55,7 +54,9 @@ const viewAllEmployees = () => {
         }
         table(data);
         console.log('Press up or down key to return to menu')
+        
     })
+    
     init()
 }
 
@@ -243,12 +244,14 @@ const init = () => {
     getDepartments()
     getEmployees()
     getRoles()
+    console.clear()
     inquirer
         .prompt(questions)
         .then((data) => {
             switch(data.selection){
                 case options[0]:
                     viewAllDepartments() 
+                    console.clear()
                     break;
                 case options[1]:
                     viewAllRoles()
